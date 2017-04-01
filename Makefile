@@ -8,7 +8,7 @@ amos: amos.cpp amos.h
 	./amos $*
 
 correlation.pdf: all.corr correlation.gp
-	gnuplot correlation.gp
+	gnuplot5 correlation.gp
 
-distribution.pdf: all-amos.bins all-visual.bins distribution.gp
-	gnuplot distribution.gp
+distribution.pdf: all.bins distribution.gp
+	gnuplot5 distribution.gp

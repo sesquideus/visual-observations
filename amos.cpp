@@ -175,67 +175,34 @@ void printHeatmap(const string filename, const vector<Observation>& all) {
     cout << "Heatmap saved to file " << filename << ".heatmap" << endl;
 }
 
-void printBinsVisual(const string filename, const vector<Observation>& all, const double width) {
-    FILE* fout = fopen((filename + "-visual.bins").c_str(), "w");
-    int count = ceil(12.0 / width + 1), counted = 0;
-    vector<int> bins(count, 0);
+void printBins(const string filename, const vector<Observation>& all, const double width) {
+    FILE* fout = fopen((filename + ".bins").c_str(), "w");
+    int count = ceil(12.0 / width + 1);
+    int counted = 0;
+    vector<int> visual(count, 0), amos(count, 0), visualCommon(count, 0), amosCommon(count, 0), amosCalibrated(count, 0), amosCalibratedCommon(count, 0);
 
     for (auto &i: all) {
+        if (i.amosCount * i.observerCount > 0) {
+            visualCommon            [(int) floor((i.magnitudeVisual + 6.0) / width)]++;
+            amosCommon              [(int) floor((i.magnitudeAMOS + 6.0) / width)]++;
+            amosCalibratedCommon    [(int) floor((i.magnitudeAMOS * 0.757057 + 6.0 + 1.7442) / width)]++;
+            ++counted;
+        }
+        if (i.amosCount > 0) {
+            amos[(int) floor((i.magnitudeAMOS + 6.0) / width)]++;
+            amosCalibrated[(int) floor((i.magnitudeAMOS * 0.757 + 1.7442 + 5.0) / width)]++;
+        }
         if (i.observerCount > 0) {
-            bins[(int) floor((i.magnitudeVisual + 6.0) / width)]++;
-            ++counted;
+            visual[(int) floor((i.magnitudeVisual + 6.0) / width)]++;
         }
     }
 
-    double u = -6.0;
-    for (auto i = bins.begin(); i != bins.end(); ++i, u += width) {
-        fprintf(fout, "%4.1f\t%d\n", u, *i);
+    for (double i = -6.0; i < 5.9; i += width) {
+        int u = (int) floor((i + 6.0) / width);
+        fprintf(fout, "%4.1f %4d %4d %4d %4d %4d %4d\n", i, visual[u], amos[u], amosCalibrated[u], visualCommon[u], amosCommon[u], amosCalibratedCommon[u]);
     }
-
     fclose(fout);
-    printf("Visual bins saved to file %s, statistics size %d\n", (filename + "-visual.bins").c_str(), counted);
-}
-
-void printBinsAMOSCalibrated(const string filename, const vector<Observation>& all, const double width) {
-    FILE* fout = fopen((filename + "-amos-calib.bins").c_str(), "w");
-    int count = ceil(12.0 / width + 1), counted = 0;
-    vector<int> bins(count, 0);
-
-    for (auto &i: all) {
-        if (i.amosCount > 0) {
-            bins[(int) floor((i.magnitudeAMOS * 0.757 + 1.7442 + 5.0) / width)]++;
-            ++counted;
-        }
-    }
-
-    double u = -5.0;
-    for (auto i = bins.begin(); i != bins.end(); ++i, u += width) {
-        fprintf(fout, "%4.1f\t%d\n", u, *i);
-    }
-
-    fclose(fout);
-    printf("AMOS bins saved to file %s, statistics size %d\n", (filename + "-amos-calib.bins").c_str(), counted);
-}
-
-void printBinsAMOS(const string filename, const vector<Observation>& all, const double width) {
-    FILE* fout = fopen((filename + "-amos.bins").c_str(), "w");
-    int count = ceil(10.0 / width + 1), counted = 0;
-    vector<int> bins(count, 0);
-
-    for (auto &i: all) {
-        if (i.amosCount > 0) {
-            bins[(int) floor((i.magnitudeAMOS + 5.0) / width)]++;
-            ++counted;
-        }
-    }
-
-    double u = -5.0;
-    for (auto i = bins.begin(); i != bins.end(); ++i, u += width) {
-        fprintf(fout, "%4.1f\t%d\n", u, *i);
-    }
-
-    fclose(fout);
-    printf("AMOS bins saved to file %s, statistics size %d\n", (filename + "-amos.bins").c_str(), counted);
+    printf("Bins saved to file %s, statistics size %d\n", (filename + ".bins").c_str(), counted);
 }
 
 void printEfficiency(const string filename, const vector<Observation>& all) {
@@ -253,9 +220,7 @@ void printEfficiency(const string filename, const vector<Observation>& all) {
     }
     printf("Filtered observations by timestamps: %lu remained\n", filtered.size());
 
-    printBinsAMOS(filename, filtered, 0.5);
-    printBinsVisual(filename, filtered, 0.5);
-    printBinsAMOSCalibrated(filename, filtered, 0.5);
+    printBins(filename, filtered, 0.5);
 }
 
 int main(int argc, char** argv) {

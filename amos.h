@@ -28,8 +28,8 @@ double toTimestamp(const string what);
 double toTimestamp(int year, int month, int day, int hour, int minute, double second);
 const string fromTimestamp(double timestamp);
 bool operator < (const Observation& o1, const Observation& o2);
+
 void printAll(const string filename, const vector<Observation>& all);
 void printHeatmap(const string filename, const vector<Observation>& all);
-void printBinsAMOS(const string filename, const vector<Observation>& all, const double width);
-void printBinsVisual(const string filename, const vector<Observation>& all, const double width);
+void printBins(const string filename, const vector<Observation>& all, const double width);
 void printEfficiency(const string filename, const vector<Observation>& all);
